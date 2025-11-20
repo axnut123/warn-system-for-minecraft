@@ -1,0 +1,55 @@
+init command:
+  /scoreboard objectives add warns dummy [name]
+  */scoreboard objectives setdisplay list warns descending
+  /scoreboard objectives add mute dummy [name]
+  */scoreboard objectives setdisplay list mute descending
+
+*:additional
+
+warns:
+  chain1:
+    execute at @a[scores={warns=2}] run tp @a [scores={warns=2}] <coord>
+    inputpermission set @a[scores={warns=2}] movement disabled
+    title @a[scores={warns=2}] title §cBanned.
+    title @a[scores={warns=2}] subtitle §cYour warnings have reached 2.
+    effect @a[scores={warns=2}] blindness 5 1 true
+    tag @a[scores={warns=2}] remove warn1
+
+  chain2:
+    tellraw @a[tag=!warn1,scores={warns=1}] {"rawtext":[{"text":"§cYou have been warned! If you get warned again, you will be banned!"}]}
+    tellraw @a {"rawtext":[{"text":"§ePlayer §c"},{"selector":"@a[tag=!warn1,scores={warns=1}]"},{"text":" §egot warned by moderator."}]}
+    tag @a[tag=!warn1,scores={warns=1}] add warn1
+  
+  chain-unwarn1:
+    testfor @a[tag=warn1,scores={warns=0}]
+    tellraw @a[tag=warn1,scores={warns=0}] {"rawtext":[{"text":"§aYou have been unwarned by moderator!"}]}
+    tellraw @a {"rawtext":[{"text":"§ePlayer §c"},{"selector":"@a[tag=warn1,scores={warns=0}]"},{"text":" §egot unwarned by moderator."}]}
+    tag @a[scores={warns=0},tag=warn1] remove warn1
+  
+  chain-unwarn2:
+    testfor @a[tag=warn2,scores={warns=0..1}]
+    tellraw @a[tag=warn2,scores={warns=0..1}] {"rawtext":[{"text":"§aYou have been unbanned by moderator!"}]}
+    tellraw @a {"rawtext":[{"text":"§ePlayer §c"},{"selector":"@a[tag=warn2,scores={warns=0..1}]"},{"text":" §egot unbanned by moderator."}]}
+    tag @a[scores={warns=0..1},tag=warn2] remove warn2
+  
+  chain3:
+    tellraw @a[tag=!warn2,scores={warns=2}] {"rawtext":[{"text":"§cYou have been banned!."}]}
+    tellraw @a {"rawtext":[{"text":"§ePlayer §c"},{"selector":"@a[tag=!warn2,scores={warns=2}]"},{"text":" §egot banned."}]}
+    tag @a[tag=!warn2,scores={warns=2}] add warn2
+  
+  chain4:
+    tp @a[scores={warns=0..1},r=2.5] <coord>
+    inputpermission set @a[scores={warns=0..1}] movement enabled
+
+mute:
+  chain1:
+    ability @a[scores={mute=1}] mute true
+    tellraw @a[tag=!muted,scores={mute=1}] {"rawtext":[{"text":"§cYou have been muted by moderator!"}]}
+    tellraw @a {"rawtext":[{"text":"§ePlayer §c"},{"selector":"@a[tag=!muted,scores={mute=1}]"},{"text":" §egot muted by moderator."}]}
+    tag @a[tag=!muted,scores={mute=1}] add muted
+  
+  chain2:
+    ability @a[scores={mute=0}] mute false
+    tellraw @a[tag=muted,scores={mute=0}] {"rawtext":[{"text":"§aYou have been unmuted by moderator!"}]}
+    tellraw @a {"rawtext":[{"text":"§ePlayer §c"},{"selector":"@a[tag=muted,scores={mute=0}]"},{"text":" §egot unmuted by moderator."}]}
+    tag @a[tag=muted,scores={mute=0}] remove muted
